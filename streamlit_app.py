@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import os
 import time
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from typing import Any
 
 import extra_streamlit_components as stx
@@ -16,7 +16,6 @@ from scpi_data import (
     WORKSHEETS,
     SheetLoadError,
     build_rankings,
-    demo_data,
     load_google_sheet,
 )
 
@@ -76,6 +75,9 @@ st.markdown(
     .masthead-kicker { margin-bottom: .5rem; color: var(--ice); font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
     .masthead-title { max-width: 780px; color: #fff; font-family: 'Fraunces', Georgia, serif; font-size: 2.4rem; font-weight: 500; line-height: 1.12; }
     .masthead-lede { margin-top: .6rem; color: #c4d4e2; font-size: .9rem; line-height: 1.5; }
+    .masthead-tools { display: flex; align-items: center; gap: .55rem; flex: 0 0 auto; }
+    .refresh-action { display: inline-flex; align-items: center; gap: .35rem; padding: .48rem .65rem; border: 1px solid #83baff; border-radius: 4px; color: #123b67 !important; background: #9bcbff; font-size: .82rem; font-weight: 700; text-decoration: none !important; white-space: nowrap; }
+    .refresh-action:hover, .refresh-action:focus, .refresh-action:visited { border-color: #2474c6; color: #fff !important; background: #2474c6; text-decoration: none !important; }
     .source-badge { flex: 0 0 auto; padding: .5rem .7rem; border: 1px solid rgba(210,231,246,.22); border-radius: 4px; color: #deebf5; background: rgba(255,255,255,.06); font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     .profile-label { margin: .2rem 0 .45rem; color: var(--muted); font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
     [data-testid="stSegmentedControl"] { margin-bottom: .35rem; }
@@ -103,7 +105,6 @@ st.markdown(
     .ranking-table tbody tr { transition: background-color .16s ease; }
     .ranking-table tbody tr:hover { background: #f3f8fc; }
     .rank-number { color: #74869a; font-size: .78rem !important; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .rank-first { color: var(--blue); }
     .company-link { color: var(--ink); font-weight: 700; text-decoration: none; text-underline-offset: 3px; }
     .company-link:hover { color: var(--blue); text-decoration: underline; }
     .company-meta { display: block; color: var(--muted); font-size: .73rem; margin-top: .17rem; }
@@ -258,6 +259,12 @@ def cached_sheet_data(sheet_id: str) -> dict[str, list[dict[str, str]]]:
     return load_google_sheet(sheet_id, WORKSHEETS)
 
 
+if st.query_params.get("refresh") == "1":
+    cached_sheet_data.clear()
+    del st.query_params["refresh"]
+    st.rerun()
+
+
 def display_percent(value: str) -> str:
     value = str(value).strip()
     if not value:
@@ -339,10 +346,13 @@ load_error = ""
 try:
     data = cached_sheet_data(SHEET_ID)
 except SheetLoadError as error:
-    data = {"data": [], "scores": [], "weights": []}
+    data = {"data": [], "scores": []}
     load_error = str(error)
 
 masthead_status = "Source connectée"
+refresh_params = dict(st.query_params)
+refresh_params["refresh"] = "1"
+refresh_url = "?" + urlencode(refresh_params)
 st.markdown(
         f"""
         <header class="masthead">
@@ -351,13 +361,16 @@ st.markdown(
             <div class="masthead-body"><div>
                 <div class="masthead-title">Classement des SCPI</div>
                 <div class="masthead-lede">Un classement transparent selon plusieurs profils d’investissement</div>
-            </div><span class="source-badge">{masthead_status}</span></div>
+            </div><div class="masthead-tools">
+                <a class="refresh-action" href="{html.escape(refresh_url, quote=True)}" title="Télécharger à nouveau les données du Google Sheet">Actualiser</a>
+                <span class="source-badge">{masthead_status}</span>
+            </div></div>
         </header>
         """,
         unsafe_allow_html=True,
 )
 
-profile_column, nue_propriete_column, _ = st.columns([1, 1.15, 2.3])
+profile_column, nue_propriete_column = st.columns([1.7, 1.3])
 with profile_column:
         st.markdown('<div class="profile-label">Profil d’investissement</div>', unsafe_allow_html=True)
         profile = st.segmented_control(
@@ -379,12 +392,6 @@ fact_rows_by_scpi = [fact_fields(item) for item in rankings]
 
 if load_error:
     st.error(f"Les données du Google Sheet ne sont pas accessibles : {html.escape(load_error)}")
-else:
-    _, refresh_column = st.columns([5, 1])
-    with refresh_column:
-        if st.button("Actualiser", icon=":material/refresh:", help="Télécharger à nouveau les données du Google Sheet"):
-            cached_sheet_data.clear()
-            st.rerun()
 
 selected_scpi_id = st.query_params.get("scpi")
 selected_scpi = next(
