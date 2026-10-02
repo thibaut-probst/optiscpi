@@ -276,7 +276,7 @@ def display_percent(value: str) -> str:
 def fact_fields(item: dict[str, Any]) -> list[tuple[str, str]]:
     percent_fields = {
         "Bonus Louve",
-        "TRI Démembrement",
+        "TRI Max Démembrement",
         "Taux de liquidité",
         "Taux d'endettement",
         "Décote",
@@ -308,8 +308,8 @@ def fact_fields(item: dict[str, Any]) -> list[tuple[str, str]]:
 
     rows = [
         ("Bonus Louve", item.get("bonus_louve", "")),
-        ("TRI Démembrement", item.get("tri_demembrement", "")),
-        ("Durée TRI Démembrement", item.get("duree_tri_demembrement", "")),
+        ("TRI Max Démembrement", item.get("tri_demembrement", "")),
+        ("Durée TRI Max Démembrement", item.get("duree_tri_demembrement", "")),
         ("Souscriptions", item.get("souscriptions", "")),
         ("Retraits", item.get("retraits", "")),
         ("Taux de liquidité", item.get("liquidity_rate", "")),
