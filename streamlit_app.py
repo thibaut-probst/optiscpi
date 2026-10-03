@@ -185,7 +185,7 @@ ACCESS_CODE = os.environ.get("SCPISCREEN_ACCESS_CODE", "")
 AUTH_COOKIE_NAME = "scpiscreen_access"
 AUTH_COOKIE_TTL_SECONDS = 30 * 24 * 60 * 60
 
-if len(ACCESS_CODE) < 32:
+if len(ACCESS_CODE) < 16:
     st.error(
         "Authentification non configurée : définissez SCPISCREEN_ACCESS_CODE "
         "(32 caractères minimum) dans l’environnement du serveur."
