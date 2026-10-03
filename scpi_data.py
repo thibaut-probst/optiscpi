@@ -49,7 +49,7 @@ def _csv_url(sheet_id: str, worksheet: str) -> str:
 def _read_google_csv(sheet_id: str, worksheet: str) -> str:
     request = urllib.request.Request(
         _csv_url(sheet_id, worksheet),
-        headers={"User-Agent": "OptiSCPI/1.0"},
+        headers={"User-Agent": "SCPIScreen/1.0"},
     )
     opener = urllib.request.build_opener(urllib.request.HTTPSHandler())
     try:

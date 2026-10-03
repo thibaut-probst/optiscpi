@@ -21,7 +21,7 @@ from scpi_data import (
 
 
 st.set_page_config(
-    page_title="OptiSCPI",
+    page_title="SCPIScreen",
     page_icon="◉",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -181,13 +181,13 @@ st.markdown(
 )
 
 
-ACCESS_CODE = os.environ.get("OPTISCPI_ACCESS_CODE", "")
-AUTH_COOKIE_NAME = "optiscpi_access"
+ACCESS_CODE = os.environ.get("SCPISCREEN_ACCESS_CODE", "")
+AUTH_COOKIE_NAME = "scpiscreen_access"
 AUTH_COOKIE_TTL_SECONDS = 30 * 24 * 60 * 60
 
 if len(ACCESS_CODE) < 32:
     st.error(
-        "Authentification non configurée : définissez OPTISCPI_ACCESS_CODE "
+        "Authentification non configurée : définissez SCPISCREEN_ACCESS_CODE "
         "(32 caractères minimum) dans l’environnement du serveur."
     )
     st.stop()
@@ -220,14 +220,14 @@ def is_valid_access_token(token: str | None) -> bool:
     return hmac.compare_digest(signature, expected_signature)
 
 
-cookie_manager = stx.CookieManager(key="optiscpi_auth_cookie")
+cookie_manager = stx.CookieManager(key="scpiscreen_auth_cookie")
 if not st.session_state.get("access_granted", False):
     if is_valid_access_token(cookie_manager.get(AUTH_COOKIE_NAME)):
         st.session_state["access_granted"] = True
 
 if not st.session_state.get("access_granted", False):
     st.markdown(
-        "<header class='masthead'><div class='brand-line'><span class='brand-mark'>O</span> OptiSCPI</div>"
+        "<header class='masthead'><div class='brand-line'><span class='brand-mark'>S</span> SCPIScreen</div>"
         "<div class='masthead-body'><div><div class='masthead-kicker'>Accès privé</div>"
         "<div class='masthead-title'>Classement des SCPI</div>"
         "<div class='masthead-lede'>Saisissez votre code d’accès pour continuer.</div></div></div></header>",
@@ -242,7 +242,7 @@ if not st.session_state.get("access_granted", False):
             cookie_manager.set(
                 AUTH_COOKIE_NAME,
                 create_access_token(),
-                key="save_optiscpi_access",
+                key="save_scpiscreen_access",
                 max_age=AUTH_COOKIE_TTL_SECONDS,
                 secure=True,
                 same_site="strict",
@@ -356,7 +356,7 @@ refresh_url = "?" + urlencode(refresh_params)
 st.markdown(
         f"""
         <header class="masthead">
-            <div class="brand-line"><span class="brand-mark">O</span><span>OptiSCPI</span>
+            <div class="brand-line"><span class="brand-mark">S</span><span>SCPIScreen</span>
                 <span class="brand-divider"></span></div>
             <div class="masthead-body"><div>
                 <div class="masthead-title">Classement des SCPI</div>
@@ -520,4 +520,3 @@ st.markdown(
     "Il ne constitue en aucun cas un conseil en investissement ni une activité de démarchage financier au sens de la réglementation de l'AMF. "
     "Il n'a pas vocation à fournir un conseil personnalisé. Les performances passées ne préjugent pas des performances futures."
 )
-

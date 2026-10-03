@@ -1,4 +1,4 @@
-# OptiSCPI
+# SCPIScreen
 
 A Streamlit prototype for comparing SCPI (Sociétés Civiles de Placement Immobilier) against three investor profiles. The interface is in French; code identifiers and comments are in English.
 
@@ -6,11 +6,11 @@ A Streamlit prototype for comparing SCPI (Sociétés Civiles de Placement Immobi
 
 ```bash
 uv sync
-export OPTISCPI_ACCESS_CODE="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export SCPISCREEN_ACCESS_CODE="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
 uv run streamlit run streamlit_app.py
 ```
 
-Set `OPTISCPI_ACCESS_CODE` as a server environment variable (or in your hosting provider's secret manager); never commit it. Use a random value of at least 32 characters. The app uses this code to sign a 30-day token stored in a `Secure`, `SameSite=Strict` cookie. Serve the app over HTTPS in production. Changing the access code invalidates existing cookies. Rotate any access code that was previously committed or shared.
+Set `SCPISCREEN_ACCESS_CODE` as a server environment variable (or in your hosting provider's secret manager); never commit it. Use a random value of at least 32 characters. The app uses this code to sign a 30-day token stored in a `Secure`, `SameSite=Strict` cookie. Serve the app over HTTPS in production. Changing the access code invalidates existing cookies. Rotate any access code that was previously committed or shared.
 
 `extra-streamlit-components` does not support `HttpOnly` cookies, so the browser-side token is readable by same-origin JavaScript. Streamlit's client IP is also not suitable for enforcing login limits. For a public deployment, put the app behind an identity-aware reverse proxy that issues `HttpOnly` sessions and rate-limits authentication attempts; do not treat the shared access code alone as strong user authentication.
 
